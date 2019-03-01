@@ -1,0 +1,35 @@
+#my-k8-container2 container contains sample spring boot application
+#filebeat-container contains filebeat running with shared log directory
+#call spring boot app's exposed_url/errorlog/<message> to write error log to file
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: k8-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: k8-app
+    spec:
+      volumes:
+      - name: shared-data
+        emptyDir: {}
+      containers:
+      - name: my-k8-container1
+        image: ashanshamika/running-ubuntu:1.0
+        volumeMounts:
+        - name: shared-data
+          mountPath: /var/log/javlog/
+      - name: my-k8-container2
+        image: ashanshamika/k8app:1.0
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: shared-data
+          mountPath: /var/log/javlog/
+      - name: filebeat-container
+        image: ashanshamika/filebeat:3.0
+        volumeMounts:
+        - name: shared-data
+          mountPath: /var/log/javlog/
